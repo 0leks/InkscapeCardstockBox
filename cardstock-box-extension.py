@@ -61,48 +61,34 @@ def vdashed(deltay, dashlength, dashgap):
     return s
 
 
-def hdashed(deltax, dashlength, dashgap):
-    # counter, dashlength, dashgap are always positive
-    # truecounter, on, off can be positive or negative depending on direction
+def hdashed(deltaX, dashL, dashRatio=.5):
+    positiveDelta = deltaX if deltaX > 0 else -deltaX
+    numDashes = positiveDelta * dashRatio // dashL
+    if numDashes == 0:
+        return None
+    spaceForGaps = positiveDelta - dashL * numDashes
+    gapL = spaceForGaps / (numDashes + 1)
+
+    dashValue = dashL if deltaX > 0 else -dashL
+    gapValue = gapL if deltaX > 0 else -gapL
+
     s = ''
-    on = dashlength
-    off = dashgap
-    counter = deltax
-    truecounter = deltax
+    distanceTraveled = 0
+    for index in range(numDashes):
+        s += f'm{gapValue},0 h{dashValue} '
+        distanceTraveled += dashValue + gapValue
 
-    if counter < 0:
-        on = -on
-        off = -off
-        counter = -counter
-
-    while True:
-        if counter < dashlength:
-            s = s + f'h{truecounter}'
-            break
-
-        s = s + f'h{on} '
-        counter -= dashlength
-        truecounter -= on
-
-        if counter < dashgap:
-            s = s + f'm{truecounter} 0'
-            break
-
-        s = s + f'm{on} 0 '
-        counter -= dashgap
-        truecounter -= off
+    remainingDistance = deltaX - distanceTraveled
+    s += f'm{remainingDistance},0'
     return s
 
 
 class CardstockBoxExtension(inkex.GenerateExtension):
-    """Please rename this class, don't keep it unnamed"""
     def add_arguments(self, pars):
         pars.add_argument("--units", type=str, dest="units", default='cm')
         pars.add_argument("--width", type=float, dest="width", default=10)
         pars.add_argument("--height", type=float, dest="height", default=10)
         pars.add_argument("--depth", type=float, dest="depth", default=10)
-
-
 
 
     def createLines(self):
@@ -121,11 +107,11 @@ class CardstockBoxExtension(inkex.GenerateExtension):
         leftSideScoreA.style = self.style
         
         middleFold1 = PathElement()
-        middleFold1.set_path(f'M{d},{h + d} {hdashed(w, 1, 1)}')
+        middleFold1.set_path(f'M{d},{h + d} {hdashed(w, 1)}')
         middleFold1.style = self.style
         
         middleFold2 = PathElement()
-        middleFold2.set_path(f'M{d + w},{h} {hdashed(-w, 1, 1)}')
+        middleFold2.set_path(f'M{d + w},{h} {hdashed(-w, 1)}')
         middleFold2.style = self.style
 
         leftSideScoreB = PathElement()
@@ -133,15 +119,15 @@ class CardstockBoxExtension(inkex.GenerateExtension):
         leftSideScoreB.style = self.style
 
         topFold2 = PathElement()
-        topFold2.set_path(f'M{d},{h + d + h + d} h{lidcut} {hdashed(w - 2*lidcut, 1, 1)} h{lidcut}')
+        topFold2.set_path(f'M{d},{h + d + h + d} h{lidcut} {hdashed(w - 2*lidcut, 2)} h{lidcut}')
         topFold2.style = self.style
 
         topFold1 = PathElement()
-        topFold1.set_path(f'M{d + w + d},{h + d + h} {hdashed(-d, 1, 1)} {hdashed(-w, 1, 1)} {hdashed(-d, 1, 1)}')
+        topFold1.set_path(f'M{d + w + d},{h + d + h} {hdashed(-d, 3)} {hdashed(-w, 1, 1)} {hdashed(-d, 3)}')
         topFold1.style = self.style
         
         topLidHelperFold = PathElement()
-        topLidHelperFold.set_path(f'M{d},{h + d + h - lidcut} {hdashed(w, 0.5, 1.5)}')
+        topLidHelperFold.set_path(f'M{d},{h + d + h - lidcut} {hdashed(w, 4, .3)}')
         topLidHelperFold.style = self.style
 
         rightSideScore = PathElement()
