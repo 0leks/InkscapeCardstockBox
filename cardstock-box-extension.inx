@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+  <name>Cardstock Box Extension</name>
+  <id>org.inkscape.tutorial.cardstock_box_extension</id>
+
+  <param name="units" type="optiongroup" appearance="combo" gui-text="">
+    <option value="cm">cm</option>
+    <option value="in">in</option>
+    <option value="mm">mm</option>
+    <option value="px">px</option>
+    <option value="pt">pt</option>
+  </param>
+  <param name="width" type="float" min="0" max="999" gui-text="Box Width">5</param>
+  <param name="height" type="float" min="0" max="999" gui-text="Box Height">7</param>
+  <param name="depth" type="float" min="0" max="999" gui-text="Box Depth">2</param>
+  <effect>
+    <effects-menu>
+      <submenu name="Render"/>
+    </effects-menu>
+  </effect>
+  <script>
+    <command location="inx" interpreter="python">cardstock-box-extension.py</command>
+  </script>
+</inkscape-extension>
