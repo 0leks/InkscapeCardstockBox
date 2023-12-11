@@ -129,7 +129,7 @@ class CardstockBoxExtension(inkex.GenerateExtension):
         middleFold2.style = self.style
 
         leftSideScoreB = PathElement()
-        leftSideScoreB.set_path(f'M{d},{h + d} {vdashed(h, 1, 1)}')
+        leftSideScoreB.set_path(f'M{d},{h + d} {vdashed(h - lidcut, 1, 1)} v{lidcut}')
         leftSideScoreB.style = self.style
 
         topFold2 = PathElement()
@@ -139,9 +139,13 @@ class CardstockBoxExtension(inkex.GenerateExtension):
         topFold1 = PathElement()
         topFold1.set_path(f'M{d + w + d},{h + d + h} {hdashed(-d, 1, 1)} {hdashed(-w, 1, 1)} {hdashed(-d, 1, 1)}')
         topFold1.style = self.style
+        
+        topLidHelperFold = PathElement()
+        topLidHelperFold.set_path(f'M{d},{h + d + h - lidcut} {hdashed(w, 0.5, 1.5)}')
+        topLidHelperFold.style = self.style
 
         rightSideScore = PathElement()
-        rightSideScore.set_path(f'M{d + w},{h + d + h} {vdashed(-h, 1, 1)} {vdashed(-d, 1, 1)} {vdashed(-h, 1, 1)}')
+        rightSideScore.set_path(f'M{d + w},{h + d + h} v{-lidcut} {vdashed(-(h - lidcut), 1, 1)} {vdashed(-d, 1, 1)} {vdashed(-h, 1, 1)}')
         rightSideScore.style = self.style
 
         cutLine = PathElement()
