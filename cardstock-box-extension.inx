@@ -13,6 +13,9 @@
   <param name="width" type="float" min="0" max="999" gui-text="Box Width">5</param>
   <param name="height" type="float" min="0" max="999" gui-text="Box Height">7</param>
   <param name="depth" type="float" min="0" max="999" gui-text="Box Depth">2</param>
+  <param name="fingerslotradius" type="float" min="0" max="999" gui-text="Finger Slot Radius">.85</param>
+  <param name="dashlength" type="float" min="0" max="999" gui-text="Dash Length (pt)">1</param>
+  <param name="dashratio" type="float" min="0" max="1" gui-text="Dash Radio">.4</param>
   <effect>
     <effects-menu>
       <submenu name="Render"/>
