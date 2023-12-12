@@ -75,76 +75,79 @@ def hdashed(deltaX, dashL, dashRatio=.4):
 class CardstockBoxExtension(inkex.GenerateExtension):
     def add_arguments(self, pars):
         pars.add_argument("--units", type=str, dest="units", default='cm')
-        pars.add_argument("--width", type=float, dest="width", default=10)
-        pars.add_argument("--height", type=float, dest="height", default=10)
-        pars.add_argument("--depth", type=float, dest="depth", default=10)
+        pars.add_argument("--width", type=float, dest="width")
+        pars.add_argument("--height", type=float, dest="height")
+        pars.add_argument("--depth", type=float, dest="depth")
+        pars.add_argument("--fingerslotradius", type=float, dest="fingerslotradius")
+        pars.add_argument("--dashlength", type=float, dest="dashlength")
+        pars.add_argument("--dashratio", type=float, dest="dashratio")
 
 
     def createLines(self):
         w = self.svg.unittouu(str(self.options.width) + self.options.units)
         h = self.svg.unittouu(str(self.options.height) + self.options.units)
         d = self.svg.unittouu(str(self.options.depth) + self.options.units)
+        fingerslotradius = self.svg.unittouu(str(self.options.fingerslotradius) + self.options.units)
+        dashlength = self.svg.unittouu(str(self.options.dashlength) + 'pt')
+        dashratio = self.options.dashratio
+
+        DL = dashlength
+        DR = dashratio
         tabdepth = d * 4/5
-        taboffset = d * 1/4
-        lidcut = taboffset
-        lidhelpercut = lidcut*5/3
-        lidradius = tabdepth*2/3
-        fingerslotradius = self.svg.unittouu('.85cm')
-        # el.set_path(f'M 0,0 {self.getVerticalDashedLine(-h, 1, 1)} h{d + w + d} {self.getVerticalDashedLine(h, 1, 1)} h{-(d + w + d)}')
+        taboffset = d * 1/8
+        bottomtaboffset = d * 1/8
+        lidcut = taboffset * 10/3
+        lidhelpercut = tabdepth * 3/5
+        lidradius = tabdepth*3/5
 
         leftSideScoreA = PathElement()
-        leftSideScoreA.set_path(f'M{d},0 {vdashed(h, 1)} {vdashed(d, 1)}')
+        leftSideScoreA.set_path(f'M{d},0 {vdashed(h, DL, DR)} {vdashed(d, DL, DR)}')
         leftSideScoreA.style = self.style
         
         middleFold1 = PathElement()
-        middleFold1.set_path(f'M{d},{h + d} {hdashed(w, 1)}')
+        middleFold1.set_path(f'M{d},{h + d} {hdashed(w, DL, DR)}')
         middleFold1.style = self.style
         
         middleFold2 = PathElement()
-        middleFold2.set_path(f'M{d + w},{h} {hdashed(-w, 1)}')
+        middleFold2.set_path(f'M{d + w},{h} {hdashed(-w, DL, DR)}')
         middleFold2.style = self.style
 
         leftSideScoreB = PathElement()
-        leftSideScoreB.set_path(f'M{d},{h + d} {vdashed(h - lidhelpercut, 1)} v{lidhelpercut}')
+        leftSideScoreB.set_path(f'M{d},{h + d} {vdashed(h - lidhelpercut, DL, DR)} v{lidhelpercut}')
         leftSideScoreB.style = self.style
 
         topFold2 = PathElement()
-        topFold2.set_path(f'M{d},{h + d + h + d} h{lidcut} {hdashed(w - 2*lidcut, 1)} h{lidcut}')
+        topFold2.set_path(f'M{d},{h + d + h + d} h{lidcut} {hdashed(w - 2*lidcut, DL, DR)} h{lidcut}')
         topFold2.style = self.style
 
         topFold1 = PathElement()
-        topFold1.set_path(f'M{d + w + d},{h + d + h} {hdashed(-d, 1)} {hdashed(-w, 1)} {hdashed(-d, 1)}')
+        topFold1.set_path(f'M{d + w + d},{h + d + h} {hdashed(-d, DL, DR)} {hdashed(-w, DL, DR)} {hdashed(-d, DL, DR)}')
         topFold1.style = self.style
         
         topLidHelperFold = PathElement()
-        topLidHelperFold.set_path(f'M{d},{h + d + h - lidhelpercut} {hdashed(w, 1, .3)}')
+        topLidHelperFold.set_path(f'M{d},{h + d + h - lidhelpercut} {hdashed(w, DL, DR*3/4)}')
         topLidHelperFold.style = self.style
 
         rightSideScore = PathElement()
-        rightSideScore.set_path(f'M{d + w},{h + d + h} v{-lidhelpercut} {vdashed(-(h - lidhelpercut), 1)} {vdashed(-d, 1)} {vdashed(-h, 1)}')
+        rightSideScore.set_path(f'M{d + w},{h + d + h} v{-lidhelpercut} {vdashed(-(h - lidhelpercut), DL, DR)} {vdashed(-d, DL, DR)} {vdashed(-h, DL, DR)}')
         rightSideScore.style = self.style
 
         cutLine = PathElement()
-        cutLine.set_path(f'M{d},0 h{-d} v{h} h{d} l{-tabdepth} {taboffset} v{d - taboffset*2} l{tabdepth} {taboffset} h{-d} v{h + tabdepth} \
+        cutLine.set_path(f'M{d},0 h{-d} v{h} h{d} l{-tabdepth} {bottomtaboffset} v{d - bottomtaboffset*2} l{tabdepth} {bottomtaboffset} h{-d} v{h + tabdepth} \
                     h{d - taboffset} l{taboffset} {-tabdepth} v{d} \
                     v{tabdepth - lidradius} a{lidradius},{lidradius},0,0,0,{lidradius},{lidradius} h{w - lidradius*2} a{lidradius},{lidradius},0,0,0,{lidradius},{-lidradius} v{-(tabdepth - lidradius)} \
                     v{-d} l{taboffset} {tabdepth} h{d - taboffset} \
-                    v{-tabdepth} v{-h} h{-d} l{tabdepth} {-taboffset} v{-d + taboffset*2} l{-tabdepth} {-taboffset} h{d} v{-h} \
+                    v{-tabdepth} v{-h} h{-d} l{tabdepth} {-bottomtaboffset} v{-d + bottomtaboffset*2} l{-tabdepth} {-bottomtaboffset} h{d} v{-h} \
                     h{-d} h{-(w/2 - fingerslotradius)} a{fingerslotradius} {fingerslotradius} 0 0 1 {-2*fingerslotradius} 0 h{-(w/2 - fingerslotradius)}')
-                    # h{d - taboffset} l{taboffset} {-tabdepth} v{d} l{taboffset} {tabdepth} h{w - taboffset*2} l{taboffset} {-tabdepth} v{-d} l{taboffset} {tabdepth} h{d - taboffset} \
-                    # h{-d} h{-(w/2 - taboffset)} v{taboffset} h{-2*taboffset} v{-taboffset} h{-(w/2 - taboffset)}')
         cutLine.style = self.style
 
         return [leftSideScoreA, middleFold1, middleFold2, leftSideScoreB, topFold2, topFold1, topLidHelperFold, rightSideScore, cutLine]
 
+
     def generate(self):
         # https://inkscapetutorial.org/shape-classes.html
-        # el1 = Rectangle(x='10', y='60', width='30', height='20')
-        # el2 = Rectangle.new(50, 60, 30, 20)
-
         self.style = {'fill' : 'none', 'stroke' : '#000000', 
                     'stroke-width' : '0.264583'}
-        layer = self.svg.get_current_layer()
         for line in self.createLines():
             yield line
 
