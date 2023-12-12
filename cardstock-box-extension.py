@@ -28,42 +28,31 @@ from inkex.elements import Polyline
 from inkex.elements import Rectangle, PathElement
 
 
-def vdashed(deltay, dashlength, dashgap):
-    # counter, dashlength, dashgap are always positive
-    # truecounter, on, off can be positive or negative depending on direction
+def vdashed(deltaY, dashL, dashRatio=.4):
+    positiveDelta = deltaY if deltaY > 0 else -deltaY
+    numDashes = int(positiveDelta * dashRatio / dashL)
+    if numDashes == 0:
+        return None
+    spaceForGaps = positiveDelta - dashL * numDashes
+    gapL = spaceForGaps / (numDashes + 1)
+
+    dashValue = dashL if deltaY > 0 else -dashL
+    gapValue = gapL if deltaY > 0 else -gapL
+
     s = ''
-    on = dashlength
-    off = dashgap
-    counter = deltay
-    truecounter = deltay
+    distanceTraveled = 0
+    for index in range(numDashes):
+        s += f'm0,{gapValue} v{dashValue} '
+        distanceTraveled += dashValue + gapValue
 
-    if counter < 0:
-        on = -on
-        off = -off
-        counter = -counter
-
-    while True:
-        if counter < dashlength:
-            s = s + f'v{truecounter}'
-            break
-
-        s = s + f'v{on} '
-        counter -= dashlength
-        truecounter -= on
-
-        if counter < dashgap:
-            s = s + f'm0 {truecounter}'
-            break
-
-        s = s + f'm0 {on} '
-        counter -= dashgap
-        truecounter -= off
+    remainingDistance = deltaY - distanceTraveled
+    s += f'm0,{remainingDistance}'
     return s
 
 
-def hdashed(deltaX, dashL, dashRatio=.5):
+def hdashed(deltaX, dashL, dashRatio=.4):
     positiveDelta = deltaX if deltaX > 0 else -deltaX
-    numDashes = positiveDelta * dashRatio // dashL
+    numDashes = int(positiveDelta * dashRatio / dashL)
     if numDashes == 0:
         return None
     spaceForGaps = positiveDelta - dashL * numDashes
@@ -98,12 +87,13 @@ class CardstockBoxExtension(inkex.GenerateExtension):
         tabdepth = d * 4/5
         taboffset = d * 1/4
         lidcut = taboffset
+        lidhelpercut = lidcut*5/3
         lidradius = tabdepth*2/3
         fingerslotradius = self.svg.unittouu('.85cm')
         # el.set_path(f'M 0,0 {self.getVerticalDashedLine(-h, 1, 1)} h{d + w + d} {self.getVerticalDashedLine(h, 1, 1)} h{-(d + w + d)}')
 
         leftSideScoreA = PathElement()
-        leftSideScoreA.set_path(f'M{d},0 {vdashed(h, 1, 1)} {vdashed(d, 1, 1)}')
+        leftSideScoreA.set_path(f'M{d},0 {vdashed(h, 1)} {vdashed(d, 1)}')
         leftSideScoreA.style = self.style
         
         middleFold1 = PathElement()
@@ -115,23 +105,23 @@ class CardstockBoxExtension(inkex.GenerateExtension):
         middleFold2.style = self.style
 
         leftSideScoreB = PathElement()
-        leftSideScoreB.set_path(f'M{d},{h + d} {vdashed(h - lidcut, 1, 1)} v{lidcut}')
+        leftSideScoreB.set_path(f'M{d},{h + d} {vdashed(h - lidhelpercut, 1)} v{lidhelpercut}')
         leftSideScoreB.style = self.style
 
         topFold2 = PathElement()
-        topFold2.set_path(f'M{d},{h + d + h + d} h{lidcut} {hdashed(w - 2*lidcut, 2)} h{lidcut}')
+        topFold2.set_path(f'M{d},{h + d + h + d} h{lidcut} {hdashed(w - 2*lidcut, 1)} h{lidcut}')
         topFold2.style = self.style
 
         topFold1 = PathElement()
-        topFold1.set_path(f'M{d + w + d},{h + d + h} {hdashed(-d, 3)} {hdashed(-w, 1, 1)} {hdashed(-d, 3)}')
+        topFold1.set_path(f'M{d + w + d},{h + d + h} {hdashed(-d, 1)} {hdashed(-w, 1)} {hdashed(-d, 1)}')
         topFold1.style = self.style
         
         topLidHelperFold = PathElement()
-        topLidHelperFold.set_path(f'M{d},{h + d + h - lidcut} {hdashed(w, 4, .3)}')
+        topLidHelperFold.set_path(f'M{d},{h + d + h - lidhelpercut} {hdashed(w, 1, .3)}')
         topLidHelperFold.style = self.style
 
         rightSideScore = PathElement()
-        rightSideScore.set_path(f'M{d + w},{h + d + h} v{-lidcut} {vdashed(-(h - lidcut), 1, 1)} {vdashed(-d, 1, 1)} {vdashed(-h, 1, 1)}')
+        rightSideScore.set_path(f'M{d + w},{h + d + h} v{-lidhelpercut} {vdashed(-(h - lidhelpercut), 1)} {vdashed(-d, 1)} {vdashed(-h, 1)}')
         rightSideScore.style = self.style
 
         cutLine = PathElement()
@@ -145,7 +135,7 @@ class CardstockBoxExtension(inkex.GenerateExtension):
                     # h{-d} h{-(w/2 - taboffset)} v{taboffset} h{-2*taboffset} v{-taboffset} h{-(w/2 - taboffset)}')
         cutLine.style = self.style
 
-        return [leftSideScoreA, middleFold1, middleFold2, leftSideScoreB, topFold2, topFold1, rightSideScore, cutLine]
+        return [leftSideScoreA, middleFold1, middleFold2, leftSideScoreB, topFold2, topFold1, topLidHelperFold, rightSideScore, cutLine]
 
     def generate(self):
         # https://inkscapetutorial.org/shape-classes.html
